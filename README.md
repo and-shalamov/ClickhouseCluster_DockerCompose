@@ -1,5 +1,7 @@
 ## Начало работы
 
+change and-shalamov
+
 Установите Docker Engine и Docker Compose.
 
 Выполните `docker compose up`. 
