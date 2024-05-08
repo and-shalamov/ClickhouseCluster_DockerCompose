@@ -17,7 +17,8 @@
     <!-- Used only with https_port. Full ssl options list: https://github.com/yandex/ClickHouse/blob/master/contrib/libpoco/NetSSL_OpenSSL/include/Poco/Net/SSLManager.h#L71 -->
     <openSSL>
         <server>
-            <!-- openssl req -subj "/CN=localhost" -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt -->
+            <!-- openssl req -subj "/CN=localhost" -new -newkey rsa:2048 -days 365 -nodes -x509
+            -keyout server.key -out server.crt -->
             <certificateFile>server.crt</certificateFile>
             <privateKeyFile>server.key</privateKeyFile>
             <!-- openssl dhparam -out dhparam.pem 4096 -->
@@ -40,9 +41,12 @@
         </client>
     </openSSL>
 
-    <!-- Default root page on http[s] server. For example load UI from https://tabix.io/ when opening http://localhost:8123 -->
+    <!-- Default root page on http[s] server. For example load UI from https://tabix.io/ when
+    opening http://localhost:8123 -->
     <!--
-    <http_server_default_response><![CDATA[<html ng-app="SMI2"><head><base href="http://ui.tabix.io/"></head><body><div ui-view="" class="content-ui"></div><script src="http://loader.tabix.io/master.js"></script></body></html>]]></http_server_default_response>
+    <http_server_default_response><![CDATA[<html ng-app="SMI2"><head><base
+    href="http://ui.tabix.io/"></head><body><div ui-view="" class="content-ui"></div><script
+    src="http://loader.tabix.io/master.js"></script></body></html>]]></http_server_default_response>
     -->
 
     <tcp_port>9000</tcp_port>
@@ -58,7 +62,8 @@
     <interserver_http_host>example.yandex.ru</interserver_http_host>
     -->
 
-    <!-- Listen specified host. use :: (wildcard IPv6 address), if you want to accept connections both with IPv4 and IPv6 from everywhere. -->
+    <!-- Listen specified host. use :: (wildcard IPv6 address), if you want to accept connections
+    both with IPv4 and IPv6 from everywhere. -->
      <listen_host>::</listen_host> 
     <listen_host>0.0.0.0</listen_host>
     <listen_host>127.0.0.1</listen_host>
@@ -69,7 +74,8 @@
     <!-- Maximum number of concurrent queries. -->
     <max_concurrent_queries>100</max_concurrent_queries>
 
-    <!-- Set limit on number of open files (default: maximum). This setting makes sense on Mac OS X because getrlimit() fails to retrieve
+    <!-- Set limit on number of open files (default: maximum). This setting makes sense on Mac OS X
+    because getrlimit() fails to retrieve
          correct maximum value. -->
     <!-- <max_open_files>262144</max_open_files> -->
 
@@ -102,6 +108,9 @@
     <!-- Path to folder where users and roles created by SQL commands are stored. -->
     <access_control_path>/var/lib/clickhouse/access/</access_control_path>
 
+    <!-- Default profile of settings.. -->
+    <default_profile>default</default_profile>
+
     <!-- Default database. -->
     <default_database>default</default_database>
 
@@ -132,14 +141,17 @@
                 </replica>
                 <replica>
                     <host>clickhouse3</host>
-                    <port>9003</port>
+                    <port>9000</port>
                 </replica>
             </shard>
         </example>
     </remote_servers>
 
-    <!-- If element has 'incl' attribute, then for it's value will be used corresponding substitution from another file.
-         By default, path to file with substitutions is /etc/metrika.xml. It could be changed in config in 'include_from' element.
+
+    <!-- If element has 'incl' attribute, then for it's value will be used corresponding
+    substitution from another file.
+         By default, path to file with substitutions is /etc/metrika.xml. It could be changed in config in
+    'include_from' element.
          Values for substitutions are specified in /yandex/name_of_substitution elements in that file.
       -->
 
@@ -166,9 +178,10 @@
     <macros incl="macros" optional="true" />
     <macros>
         <cluster>example</cluster>
-        <shard>${SHARD}</shard>
-        <replica>clickhouse${REPLICA}</replica>
+        <shard>01</shard>
+        <replica>clickhouse1</replica>
     </macros>
+
 
     <distributed_ddl>
         <!-- Путь в ZooKeeper для очереди содержащей DDL запросы -->
@@ -268,7 +281,8 @@
     -->
 
     <!-- Path to file with region hierarchy. -->
-    <!-- <path_to_regions_hierarchy_file>/opt/geo/regions_hierarchy.txt</path_to_regions_hierarchy_file> -->
+    <!--
+    <path_to_regions_hierarchy_file>/opt/geo/regions_hierarchy.txt</path_to_regions_hierarchy_file> -->
 
     <!-- Path to directory with files containing names of regions -->
     <!-- <path_to_regions_names_files>/opt/geo/</path_to_regions_names_files> -->
@@ -284,12 +298,14 @@
       -->
     <compression incl="clickhouse_compression">
     <!--
-        <!- - Set of variants. Checked in order. Last matching case wins. If nothing matches, lz4 will be used. - ->
+        <!- - Set of variants. Checked in order. Last matching case wins. If nothing matches, lz4 will be
+        used. - ->
         <case>
 
             <!- - Conditions. All must be satisfied. Some conditions may be omitted. - ->
             <min_part_size>10000000000</min_part_size>        <!- - Min part size in bytes. - ->
-            <min_part_size_ratio>0.01</min_part_size_ratio>    <!- - Min size of part relative to whole table size. - ->
+            <min_part_size_ratio>0.01</min_part_size_ratio>    <!- - Min size of part relative to whole table
+        size. - ->
 
             <!- - What compression method to use. - ->
             <method>zstd</method>    <!- - Keep in mind that zstd compression library is highly experimental. - ->
@@ -301,7 +317,8 @@
         <task_queue_path>/clickhouse/task_queue</task_queue_path>
     </resharding>
 
-    <!-- Settings to fine tune MergeTree tables. See documentation in source code, in MergeTreeSettings.h -->
+    <!-- Settings to fine tune MergeTree tables. See documentation in source code, in
+    MergeTreeSettings.h -->
     <!--
     <merge_tree>
         <max_suspicious_broken_parts>5</max_suspicious_broken_parts>
@@ -309,8 +326,10 @@
     -->
 
     <!-- Protection from accidental DROP.
-         If size of a MergeTree table is greater than max_table_size_to_drop (in bytes) than table could not be dropped with any DROP query.
-         If you want do delete one table and don't want to restart clickhouse-server, you could create special file <clickhouse-path>/flags/force_drop_table and make DROP once.
+         If size of a MergeTree table is greater than max_table_size_to_drop (in bytes) than table could not
+    be dropped with any DROP query.
+         If you want do delete one table and don't want to restart clickhouse-server, you could create
+    special file <clickhouse-path>/flags/force_drop_table and make DROP once.
          By default max_table_size_to_drop is 50GB, max_table_size_to_drop=0 allows to DROP any tables.
          Uncomment to disable protection.
     -->
