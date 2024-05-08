@@ -1,25 +1,44 @@
 version: '2'
 
-networks: 
-  main:
+networks:
+  clickhouse-network:
+    name: clickhouse-network
+    ipam:
+      config:
+        - subnet: 172.23.0.0/24
 
 services:
     haproxy:
         image: haproxy
+        container_name: haproxy
+        hostname: haproxy
         ports:
-            - "9001:9000"
+            - "9111:9000"
+            - "9123:8123"
+            - "10001:10001"
         volumes:
             - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-        networks: 
-            - main  
+
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.10
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
         depends_on: 
           - clickhouse1
           - clickhouse2
           - clickhouse3
     
-    
     zoo1:
-        image: zookeeper:latest
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/zookeeper:master
+        container_name: zoo1
+        hostname: zoo1
         expose:
             - "2181"
             - "2888"
@@ -27,11 +46,22 @@ services:
         environment:
             ZOO_MY_ID: "1"
             ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
-        networks: 
-            - main  
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.11
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
 
     zoo2:
-        image: zookeeper:latest
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/zookeeper:master
+        container_name: zoo2
+        hostname: zoo2
         expose:
             - "2181"
             - "2888"
@@ -39,11 +69,22 @@ services:
         environment:
             ZOO_MY_ID: "2"
             ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888
-        networks: 
-            - main  
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.12
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
 
     zoo3:
-        image: zookeeper:latest
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/zookeeper:master
+        container_name: zoo3
+        hostname: zoo3
         expose:
             - "2181"
             - "2888"
@@ -51,53 +92,126 @@ services:
         environment:
             ZOO_MY_ID: "3"
             ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=0.0.0.0:2888:3888
-        networks: 
-            - main  
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.13
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
 
     clickhouse1:
-        image: yandex/clickhouse-server
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/clickhouse-server:master
+        container_name: clickhouse1
+        hostname: clickhouse1
         expose:
           #replica sync port
           - "9010"
           #client port
           - "9000"
+        ports:
+          - "18123:8123"
+          - "19000:9000"
         depends_on: 
           - zoo1
           - zoo2
           - zoo3
         volumes:
           - ./config_1.xml:/etc/clickhouse-server/config.xml
-        networks: 
-            - main  
+          - ./users.xml:/etc/clickhouse-server/users.xml
+          - ./data/clickhouse1:/var/lib/clickhouse
+#          - ./config/clickhouse1:/etc/clickhouse-server
+        ulimits:
+          nofile:
+           soft: 262144
+           hard: 262144
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.21
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
           
     clickhouse2:
-        image: yandex/clickhouse-server
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/clickhouse-server:master
+        container_name: clickhouse2
+        hostname: clickhouse2
         expose:
           #replica sync port
           - "9011"
           #client port
           - "9000"
+        ports:
+          - "28123:8123"
+          - "29000:9000"
         depends_on: 
           - zoo1
           - zoo2
           - zoo3
         volumes:
           - ./config_2.xml:/etc/clickhouse-server/config.xml
-        networks: 
-            - main  
+          - ./users.xml:/etc/clickhouse-server/users.xml
+          - ./data/clickhouse2:/var/lib/clickhouse
+#          - ./config/clickhouse2:/etc/clickhouse-server
+        ulimits:
+          nofile:
+            soft: 262144
+            hard: 262144
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.22
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
 
     clickhouse3:
-        image: yandex/clickhouse-server
+        image: registry.hub.nspd.rosreestr.gov.ru/nspd/docker/clickhouse-server:master
+        container_name: clickhouse3
+        hostname: clickhouse3
         expose: 
           #replica sync port
           - "9012"
           #client port
           - "9000"
+        ports:
+          - "38123:8123"
+          - "39000:9000"
         depends_on: 
           - zoo1
           - zoo2
           - zoo3
         volumes:
           - ./config_3.xml:/etc/clickhouse-server/config.xml
-        networks: 
-            - main  
+          - ./users.xml:/etc/clickhouse-server/users.xml
+          - ./data/clickhouse3:/var/lib/clickhouse
+#          - ./config/clickhouse3:/etc/clickhouse-server
+        ulimits:
+          nofile:
+            soft: 262144
+            hard: 262144
+        networks:
+          clickhouse-network:
+            ipv4_address: 172.23.0.23
+        extra_hosts:
+          - "haproxy:172.23.0.10"
+          - "zoo1:172.23.0.11"
+          - "zoo2:172.23.0.12"
+          - "zoo3:172.23.0.13"
+          - "clickhouse1:172.23.0.21"
+          - "clickhouse2:172.23.0.22"
+          - "clickhouse3:172.23.0.23"
+
