@@ -126,6 +126,7 @@ services:
           - ./data/clickhouse1:/var/lib/clickhouse
 #          - ./config/clickhouse1:/etc/clickhouse-server
         ulimits:
+          nproc: 30000
           nofile:
            soft: 262144
            hard: 262144
@@ -163,6 +164,7 @@ services:
           - ./data/clickhouse2:/var/lib/clickhouse
 #          - ./config/clickhouse2:/etc/clickhouse-server
         ulimits:
+          nproc: 30000
           nofile:
             soft: 262144
             hard: 262144
@@ -200,6 +202,7 @@ services:
           - ./data/clickhouse3:/var/lib/clickhouse
 #          - ./config/clickhouse3:/etc/clickhouse-server
         ulimits:
+          nproc: 30000
           nofile:
             soft: 262144
             hard: 262144
